@@ -1,17 +1,20 @@
-# This is a sample Python script.
+from logging import debug
+import logging
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+from client.interaction.InteractionManager import InteractionManager
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+def test_init():
+    interaction_manager = InteractionManager()
+    interaction_manager.start()
+
+
+def main():
     import client.read_write_test.Read
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.DEBUG)
+    debug("Initializing...")
+    test_init()
+    # main()
