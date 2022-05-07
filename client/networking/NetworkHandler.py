@@ -29,3 +29,7 @@ class NetworkHandler:
     def send_multicast_message(self, message: Message) -> None:
         data = pickle.dumps(message)
         self.socket.send(data)
+
+    def send_unicast_message(self, message: Message, address: str) -> None:
+        data = pickle.dumps(message)
+        self.socket.sendto(data, address)

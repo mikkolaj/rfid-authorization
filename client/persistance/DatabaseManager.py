@@ -3,8 +3,11 @@ from enum import Enum
 from logging import info, debug
 from sqlite3 import Cursor
 from time import time
+from typing import Optional, List
 
+from client.persistance.Authorization import Authorization
 from client.persistance.EventType import EventType
+from client.persistance.types.User import User
 
 
 class TableName(Enum):
@@ -42,7 +45,7 @@ class DatabaseManager:
             )'''
         )
 
-    def create_log(self, tag_id, event_type: EventType) -> None:
+    def create_log(self, tag_id: int, event_type: EventType) -> None:
         self.c.execute(f"""INSERT INTO logs VALUES ({time()}, {event_type}, {tag_id})""")
 
     # def create_user(self, tag_id):
@@ -61,14 +64,24 @@ class DatabaseManager:
     #     else:
     #         self.create_user(tag_id)
 
-    def create_or_update_user(self, tag_id, is_authorized=True) -> None:
+    def create_or_update_user(self, tag_id: int, is_authorized: Authorization = Authorization.AUTHORIZED,
+                              update_time: float = time()) -> None:
         self.c.execute(
             f'INSERT OR REPLACE INTO users(tag_id, is_authorized, created_at) '
-            f'VALUES ({tag_id}, {is_authorized}, {time()})'
+            f'VALUES ({tag_id}, {is_authorized}, {update_time})'
         )
         self.conn.commit()
 
-    def is_tag_authorized(self, tag_id) -> bool:
+    def get_user(self, tag_id: int) -> Optional[User]:
+        self.c.execute(f'SELECT * FROM users WHERE tag_id = {tag_id}')
+        result = self.c.fetchone()
+
+        if result is None:
+            return None
+        else:
+            return User(result[0], result[1], result[2])
+
+    def is_tag_authorized(self, tag_id: int) -> bool:
         self.c.execute(f'SELECT is_authorized FROM users WHERE tag_id = {tag_id}')
         return self.c.fetchone()[0] == 1
 
@@ -84,3 +97,9 @@ class DatabaseManager:
 
     def get_all(self, table_name: TableName) -> Cursor:
         return self.c.execute(f'SELECT * FROM {table_name}')
+
+    def get_all_users(self) -> List[User]:
+        users = list()
+        for user in self.c.execute(f'SELECT * FROM {TableName.USERS}'):
+            users.append(user)
+        return users
