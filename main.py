@@ -29,4 +29,6 @@ if __name__ == '__main__':
     managerBazy.print_users()
     managerBazy.modify_user(11, 1)
     managerBazy.print_users()
+    debug(managerBazy.is_tag_authorized(10))
+    debug(managerBazy.is_tag_authorized(11))
     main()

@@ -56,6 +56,9 @@ class DatabaseManager:
     def create_or_update_user(self, tag_id, is_authorized=True):
         self.c.execute(f'')
 
+    def is_tag_authorized(self, tag_id):
+        self.c.execute(f'SELECT is_authorized FROM users WHERE tag_id = {tag_id}')
+        return self.c.fetchone()[0] == 1
 
     def print_users(self):
         print("=============USERS==============")
