@@ -1,8 +1,14 @@
 import sqlite3
+from enum import Enum
 from logging import info, debug
 from time import time
 
 from client.persistance.EventType import EventType
+
+
+class TableName(Enum):
+    USERS = 'users',
+    LOGS = 'logs'
 
 
 class DatabaseManager:
@@ -37,35 +43,42 @@ class DatabaseManager:
     def create_log(self, tag_id, event_type: EventType):
         self.c.execute(f"""INSERT INTO logs VALUES ({time()}, {event_type}, {tag_id})""")
 
-    def create_user(self, tag_id):
-        self.c.execute(
-            f"""INSERT INTO users(tag_id, is_authorized, created_at) VALUES ({tag_id}, 1, {time()})""")
-        self.conn.commit()
-
-    def modify_user(self, tag_id, is_authorized):
-        self.c.execute(f'SELECT COUNT(*) FROM users WHERE tag_id = {tag_id}')
-        is_user_present = self.c.fetchone()[0]
-
-        if is_user_present > 0:
-            self.c.execute(
-                f"UPDATE users SET is_authorized = {is_authorized}, created_at = {time()} WHERE tag_id = {tag_id}")
-            self.conn.commit()
-        else:
-            self.create_user(tag_id)
+    # def create_user(self, tag_id):
+    #     self.c.execute(
+    #         f"""INSERT INTO users(tag_id, is_authorized, created_at) VALUES ({tag_id}, 1, {time()})""")
+    #     self.conn.commit()
+    #
+    # def modify_user(self, tag_id, is_authorized):
+    #     self.c.execute(f'SELECT COUNT(*) FROM users WHERE tag_id = {tag_id}')
+    #     is_user_present = self.c.fetchone()[0]
+    #
+    #     if is_user_present > 0:
+    #         self.c.execute(
+    #             f"UPDATE users SET is_authorized = {is_authorized}, created_at = {time()} WHERE tag_id = {tag_id}")
+    #         self.conn.commit()
+    #     else:
+    #         self.create_user(tag_id)
 
     def create_or_update_user(self, tag_id, is_authorized=True):
-        self.c.execute(f'')
+        self.c.execute(
+            f'INSERT OR REPLACE INTO users(tag_id, is_authorized, created_at) '
+            f'VALUES ({tag_id}, {is_authorized}, {time()})'
+        )
+        self.conn.commit()
 
     def is_tag_authorized(self, tag_id):
         self.c.execute(f'SELECT is_authorized FROM users WHERE tag_id = {tag_id}')
         return self.c.fetchone()[0] == 1
 
     def print_users(self):
-        print("=============USERS==============")
-        for row in self.c.execute('SELECT * FROM users'):
-            print(row)
+        info("=============USERS==============")
+        for row in self.get_all():
+            info(row)
 
     def print_logs(self):
-        print("=============LOGS==============")
-        for row in self.c.execute('SELECT * FROM logs'):
-            print(row)
+        info("=============LOGS==============")
+        for row in self.get_all():
+            info(row)
+
+    def get_all(self, table_name):
+        return self.c.execute(f'SELECT * FROM {table_name}')

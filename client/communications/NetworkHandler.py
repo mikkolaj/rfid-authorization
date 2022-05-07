@@ -18,7 +18,7 @@ class NetworkHandler:
         sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
         self.socket = sock
 
-    def receive_multicast_message(self) -> Message:
+    def receive_multicast_message(self):
         data = self.socket.recv(4096)
         return pickle.loads(data)
 
