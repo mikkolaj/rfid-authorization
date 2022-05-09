@@ -26,9 +26,6 @@ class Host(Thread):
     def connect(self):
         interpreter = Thread(target=self.interpret_message)
         r = Timer(ROOT_TIMEOUT_SECONDS, self.set_root)
-        """
-        sł
-        """
 
     def interpret_message(self) -> None:
         message = self.network_handler.receive_multicast_message()
@@ -52,9 +49,3 @@ class Host(Thread):
             if current_user is None or current_user.date < user.date:
                 self.database_manager.create_or_update_user(user.tag_id, user.is_authorized, user.date)
 
-    def compare_mac(self):
-        pass
-
-    def set_root(self):
-        self.compare_mac(self.best_mac, self.mac)
-#         I COS TAM SE DALEJ
