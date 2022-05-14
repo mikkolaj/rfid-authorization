@@ -14,11 +14,14 @@ class TableName(Enum):
     USERS = 'users',
     LOGS = 'logs'
 
+    def __str__(self):
+        return str(self.value[0])
+
 
 class DatabaseManager:
     def __init__(self):
         debug("Establishing connection with database")
-        self.conn = sqlite3.connect('resources/database.sqlite')
+        self.conn = sqlite3.connect('resources/database.sqlite', check_same_thread=False)
         self.c = self.conn.cursor()
         self.create_tables()
 
@@ -47,22 +50,6 @@ class DatabaseManager:
 
     def create_log(self, tag_id: int, event_type: EventType) -> None:
         self.c.execute(f"""INSERT INTO logs VALUES ({time()}, {event_type}, {tag_id})""")
-
-    # def create_user(self, tag_id):
-    #     self.c.execute(
-    #         f"""INSERT INTO users(tag_id, is_authorized, created_at) VALUES ({tag_id}, 1, {time()})""")
-    #     self.conn.commit()
-    #
-    # def modify_user(self, tag_id, is_authorized):
-    #     self.c.execute(f'SELECT COUNT(*) FROM users WHERE tag_id = {tag_id}')
-    #     is_user_present = self.c.fetchone()[0]
-    #
-    #     if is_user_present > 0:
-    #         self.c.execute(
-    #             f"UPDATE users SET is_authorized = {is_authorized}, created_at = {time()} WHERE tag_id = {tag_id}")
-    #         self.conn.commit()
-    #     else:
-    #         self.create_user(tag_id)
 
     def create_or_update_user(self, tag_id: int, is_authorized: Authorization = Authorization.AUTHORIZED,
                               update_time: float = time()) -> None:
@@ -99,7 +86,5 @@ class DatabaseManager:
         return self.c.execute(f'SELECT * FROM {table_name}')
 
     def get_all_users(self) -> List[User]:
-        users = list()
-        for user in self.c.execute(f'SELECT * FROM {TableName.USERS}'):
-            users.append(user)
-        return users
+        users = self.c.execute(f'SELECT * FROM {TableName.USERS}')
+        return list(map(lambda u: User(u[0], u[1], u[2]), users))
