@@ -1,23 +1,17 @@
 from logging import debug
 import logging
-from time import time
 
+from client.interaction.Door import Door
 from client.networking.Host import Host
 from client.networking.NetworkHandler import NetworkHandler
 from client.persistance.Authorization import Authorization
 from client.persistance.DatabaseManager import DatabaseManager
+from client.interaction.InteractionManager import InteractionManager
 
 
-def initialize_interaction(database_manager: DatabaseManager):
-    from client.interaction.InteractionManager import InteractionManager
-    interaction_manager = InteractionManager(database_manager)
+def initialize_interaction(host: Host, database_manager: DatabaseManager):
+    interaction_manager = InteractionManager(host, database_manager)
     interaction_manager.start()
-
-
-def initialize_communication(database_manager: DatabaseManager):
-    network_handler = NetworkHandler()
-    host = Host(network_handler, database_manager)
-    host.start()
 
 
 def set_admin(database_manager: DatabaseManager):
@@ -35,6 +29,9 @@ if __name__ == '__main__':
     database_manager = DatabaseManager()
     set_admin(database_manager)
     database_manager.print_users()
-    initialize_interaction(database_manager)
-    initialize_communication(database_manager)
+
+    network_handler = NetworkHandler()
+    host = Host(network_handler, database_manager)
+    host.start()
+    initialize_interaction(host, database_manager)
     main()
