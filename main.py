@@ -12,7 +12,8 @@ def initialize_interaction():
     interaction_manager.start()
 
 
-def initialize_communication(database_manager: DatabaseManager):
+def initialize_communication():
+    database_manager = DatabaseManager()
     network_handler = NetworkHandler()
     host = Host(network_handler, database_manager)
     host.start()
@@ -29,6 +30,5 @@ if __name__ == '__main__':
     if not dev:
         # initialize_interaction()
         pass
-    database_manager = DatabaseManager()
-    initialize_communication(database_manager)
+    initialize_communication()
     main()
