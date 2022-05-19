@@ -1,5 +1,5 @@
 from datetime import datetime
-from logging import debug
+# from logging import debug
 from random import randint
 from threading import Thread, Event
 from time import sleep
@@ -42,26 +42,27 @@ class Host(Thread):
             message.accept(self)
 
     def handle_im_alive(self, message: ImAliveMessage) -> None:
-        debug(f"Handling message {message}")
+        # debug(f"Handling message {message}")
         self.im_alive_update_time = datetime.now()
         if message.mac < self.root_mac:
             self.root_mac = message.mac
             self.root_address = message.sender
 
     def handle_db_snapshot_request(self, message: DbSnapshotRequest) -> None:
-        debug("Handling db snapshot message")
+        # debug("Handling db snapshot message")
         users = self.database_manager.get_all_users()
         snapshot = DbUpdateMessage(users)
 
         self.network_handler.send_unicast_message(snapshot, message.sender)
 
     def handle_db_update_message(self, message: DbUpdateMessage) -> None:
-        debug("Handling db update message")
+        # debug("Handling db update message")
         for user in message.db_records:
             current_user = self.database_manager.get_user(user.tag_id)
 
             if current_user is None or current_user.date < user.date:
-                self.database_manager.create_or_update_user(user.tag_id, user.is_authorized, user.date)
+                self.database_manager.create_or_update_user(
+                    user.tag_id, user.is_authorized, user.date)
                 if self.root_mac == self.mac:
                     self.network_handler.send_multicast_message(message)
 
@@ -70,12 +71,13 @@ class Host(Thread):
         ticker = Event()
         self.im_alive_update_time = datetime.now()
         while True:
-            debug(f"Current root mac{self.root_mac}")
+            # debug(f"Current root mac{self.root_mac}")
             if self.mac == self.root_mac:
                 if not ticker.wait(IM_ALIVE_TIME_SECONDS):
-                    self.network_handler.send_multicast_message(im_alive_message)
+                    self.network_handler.send_multicast_message(
+                        im_alive_message)
             elif not ticker.wait(ROOT_TIMEOUT_SECONDS) and self.root_timeout_exceeded():
-                debug("Root time exceeded - im the root now")
+                # debug("Root time exceeded - im the root now")
                 self.root_mac = self.mac
                 self.request_db_snapshot()
 
@@ -91,5 +93,6 @@ class Host(Thread):
         if self.is_root():
             self.network_handler.send_multicast_message(message)
         else:
-            self.network_handler.send_unicast_message(message, self.root_address)
-        debug("Db snapshot request sent")
+            self.network_handler.send_unicast_message(
+                message, self.root_address)
+        # debug("Db snapshot request sent")
