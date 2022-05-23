@@ -1,5 +1,5 @@
 from datetime import datetime
-from logging import debug
+from logging import debug, info
 from random import randint
 from threading import Thread, Event
 from time import sleep
@@ -22,9 +22,9 @@ class Host(Thread):
         self.database_manager = database_manager
         # self.mac = uuid.getnode()
         self.mac = randint(0, 100)
-        self.root_mac: Optional[int] = self.mac
+        self.root_mac: int = self.mac
         self.im_alive_update_time = None
-        print("my mac ", self.mac)
+        info("MAC:", self.mac)
 
     def run(self):
         self.connect()
@@ -64,7 +64,7 @@ class Host(Thread):
             if current_user is None or current_user.date < user.date:
                 self.database_manager.create_or_update_user(
                     user.tag_id, user.is_authorized, user.date)
-                if self.root_mac == self.mac:
+                if self.is_root():
                     self.network_handler.send_multicast_message(message)
 
     def root_thread(self):
@@ -73,7 +73,7 @@ class Host(Thread):
         self.im_alive_update_time = datetime.now()
         while True:
             debug(f"Current root mac{self.root_mac}")
-            if self.mac == self.root_mac:
+            if self.is_root():
                 if not ticker.wait(IM_ALIVE_TIME_SECONDS):
                     self.network_handler.send_multicast_message(
                         im_alive_message)
