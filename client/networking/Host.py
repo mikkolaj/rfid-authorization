@@ -11,6 +11,7 @@ from client.networking.messages.DbSnapshotRequest import DbSnapshotRequest
 from client.networking.messages.DbUpdateMessage import DbUpdateMessage
 from client.networking.messages.ImAliveMessage import ImAliveMessage
 from client.persistance.DatabaseManager import DatabaseManager
+from client.persistance.types.User import User
 
 
 class Host(Thread):
@@ -61,7 +62,8 @@ class Host(Thread):
             current_user = self.database_manager.get_user(user.tag_id)
 
             if current_user is None or current_user.date < user.date:
-                self.database_manager.create_or_update_user(user.tag_id, user.is_authorized, user.date)
+                self.database_manager.create_or_update_user(
+                    user.tag_id, user.is_authorized, user.date)
                 if self.is_root():
                     self.network_handler.send_multicast_message(message)
 
@@ -73,7 +75,8 @@ class Host(Thread):
             debug(f"Current root mac{self.root_mac}")
             if self.is_root():
                 if not ticker.wait(IM_ALIVE_TIME_SECONDS):
-                    self.network_handler.send_multicast_message(im_alive_message)
+                    self.network_handler.send_multicast_message(
+                        im_alive_message)
             elif not ticker.wait(ROOT_TIMEOUT_SECONDS) and self.root_timeout_exceeded():
                 debug("Root time exceeded - im the root now")
                 self.root_mac = self.mac
@@ -91,5 +94,17 @@ class Host(Thread):
         if self.is_root():
             self.network_handler.send_multicast_message(message)
         else:
-            self.network_handler.send_unicast_message(message, self.root_address)
+            self.network_handler.send_unicast_message(
+                message, self.root_address)
         debug("Db snapshot request sent")
+
+    def send_one_user_update_to_root(self, tag_id: int):
+        debug("Sending one user update to root!")
+        user = self.database_manager.get_user(tag_id)
+        message = DbUpdateMessage([user])
+
+        if self.is_root():
+            self.network_handler.send_multicast_message(message)
+        else:
+            self.network_handler.send_unicast_message(
+                message, self.root_address)
