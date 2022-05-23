@@ -12,7 +12,6 @@ class Door(Thread):
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(DOOR_LED_PIN, GPIO.OUT)
         GPIO.output(DOOR_LED_PIN, GPIO.LOW)
-        pass
 
     def open(self):
         for _ in range(10):
@@ -21,12 +20,9 @@ class Door(Thread):
             GPIO.output(DOOR_LED_PIN, GPIO.LOW)
             sleep(0.05)
 
-        pass
-
     def close(self):
         for _ in range(5):
             GPIO.output(DOOR_LED_PIN, GPIO.HIGH)
             sleep(0.1)
             GPIO.output(DOOR_LED_PIN, GPIO.LOW)
             sleep(0.1)
-        pass

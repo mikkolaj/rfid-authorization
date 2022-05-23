@@ -14,40 +14,34 @@ from logging import info, debug
 
 
 class Scanner(Thread):
-    def __init__(self, device_id, host: Host, door: Door, database_manager: DatabaseManager):
+    def __init__(self, placement: Placement, host: Host, door: Door, database_manager: DatabaseManager):
         super().__init__()
-        self.device_id = device_id
         self.database_manager = database_manager
-        debug(f"Initializing scanner {self.device_id}")
-        self.board = SimpleMFRC522(bus=0, device=device_id)
-        debug(f"Scanner {self.device_id} initialized")
+        debug(f"Initializing scanner {placement}")
+        self.board = SimpleMFRC522(bus=0, device=placement.value)
+        debug(f"Scanner {placement} initialized")
         self.mode = InteractionMode.NO_ACTION
-        self.placement = Placement.ENTRANCE if device_id == 0 else Placement.EXIT
+        self.placement = placement
         self.host = host
         self.door = door
-        self.is_modify_mode = False
 
     def run(self):
-        info(f"Scanner {self.device_id} started")
+        info(f"Scanner {self.placement} started")
         while True:
             tag_id = self.board.read()[0]
             info(tag_id)
             if self.mode == InteractionMode.READ:
                 user = self.database_manager.get_user(tag_id)
-                is_authorized = Authorization.UNAUTHORIZED.value if user is None else int(
-                    user.is_authorized)
-                if self.is_modify_mode:
-                    self.handle_modify_user(is_authorized, tag_id)
-                elif is_authorized == Authorization.UNAUTHORIZED.value:
+                is_authorized = Authorization.UNAUTHORIZED if user is None else user.is_authorized
+                if is_authorized == Authorization.UNAUTHORIZED:
                     self.handle_unauthorized_user(tag_id)
-                elif is_authorized == Authorization.AUTHORIZED.value:
+                elif is_authorized == Authorization.AUTHORIZED:
                     self.handle_authorized_user(tag_id)
-                elif is_authorized == Authorization.ADMIN.value:
+                elif is_authorized == Authorization.ADMIN:
                     self.handle_admin_user()
 
-                pass
             elif self.mode == InteractionMode.WRITE:
-                pass
+                self.handle_modify_user(is_authorized, tag_id)
 
             sleep(2)
 
@@ -56,12 +50,13 @@ class Scanner(Thread):
 
     def handle_unauthorized_user(self, tag_id: int):
         info("Unauthorized!!")
-        event = EventType.DENIED_ENTRANCE if self.isEntrance() else EventType.DENIED_LEAVE
+        event = EventType.DENIED_ENTRANCE if self.is_entrance() else EventType.DENIED_LEAVE
         self.database_manager.create_log(tag_id, event)
 
     def handle_authorized_user(self, tag_id: int):
         self.door.open()
-        event = EventType.AUTHORIZED_ENTRANCE if self.isEntrance() else EventType.AUTHORIZED_LEAVE
+        event = EventType.AUTHORIZED_ENTRANCE if self.is_entrance(
+        ) else EventType.AUTHORIZED_LEAVE
         self.database_manager.create_log(tag_id, event)
         sleep(3)
         self.door.close()
@@ -73,20 +68,16 @@ class Scanner(Thread):
         print("\n")
         self.database_manager.print_logs()
         print("\n")
-        self.is_modify_mode = True
+        self.set_interaction_mode(InteractionMode.WRITE)
 
-    def handle_modify_user(self, is_authorized: int, tag_id: int):
-        if(is_authorized == Authorization.UNAUTHORIZED.value):
-            info("Adding user!!")
-            self.database_manager.create_or_update_user(
-                tag_id, Authorization.AUTHORIZED)
-        else:
-            info("Removing user rights!!")
-            self.database_manager.create_or_update_user(
-                tag_id, Authorization.UNAUTHORIZED)
+    def handle_modify_user(self, is_authorized: Authorization, tag_id: int):
+        info("Adding user!!" if is_authorized ==
+             Authorization.UNAUTHORIZED else "Removing user rights!!")
 
+        self.database_manager.create_or_update_user(
+            tag_id, is_authorized)
         self.host.send_one_user_update_to_root(tag_id)
-        self.is_modify_mode = False
+        self.set_interaction_mode(InteractionMode.READ)
 
-    def isEntrance(self):
+    def is_entrance(self):
         return self.placement == Placement.ENTRANCE

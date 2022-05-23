@@ -8,3 +8,8 @@ class Authorization(Enum):
 
     def __str__(self):
         return str(self.value)
+
+    def fromInt(number):
+        for key in Authorization:
+            if key.value == number:
+                return key
