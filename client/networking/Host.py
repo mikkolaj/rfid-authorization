@@ -4,6 +4,7 @@ from random import randint
 from threading import Thread, Event
 from time import sleep
 from typing import Optional
+import uuid
 
 from client.networking.NetworkConfig import ROOT_TIMEOUT_SECONDS, IM_ALIVE_TIME_SECONDS
 from client.networking.NetworkHandler import NetworkHandler
@@ -20,8 +21,7 @@ class Host(Thread):
         self.root_address: Optional[str] = None
         self.network_handler = network_handler
         self.database_manager = database_manager
-        # self.mac = uuid.getnode()
-        self.mac = randint(0, 100)
+        self.mac = uuid.getnode()
         self.root_mac: int = self.mac
         self.im_alive_update_time = None
         info("MAC:" + str(self.mac))
