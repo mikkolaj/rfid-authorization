@@ -43,11 +43,12 @@ class Host(Thread):
             message.accept(self)
 
     def handle_im_alive(self, message: ImAliveMessage) -> None:
-        debug(f"Handling message {message}")
-        self.im_alive_update_time = datetime.now()
-        if message.mac < self.root_mac:
-            self.root_mac = message.mac
-            self.root_address = message.sender
+        if message.mac != self.mac:
+            debug(f"Handling message {message}")
+            self.im_alive_update_time = datetime.now()
+            if message.mac < self.root_mac:
+                self.root_mac = message.mac
+                self.root_address = message.sender
 
     def handle_db_snapshot_request(self, message: DbSnapshotRequest) -> None:
         debug("Handling db snapshot message")
@@ -72,7 +73,7 @@ class Host(Thread):
         ticker = Event()
         self.im_alive_update_time = datetime.now()
         while True:
-            debug(f"Current root mac{self.root_mac}")
+            debug(f"Current root mac {self.root_mac}")
             if self.is_root():
                 if not ticker.wait(IM_ALIVE_TIME_SECONDS):
                     self.network_handler.send_multicast_message(
