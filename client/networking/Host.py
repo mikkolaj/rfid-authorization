@@ -5,6 +5,7 @@ from threading import Thread, Event
 from time import sleep
 from typing import Optional
 import uuid
+import netifaces as ni
 
 from client.networking.NetworkConfig import ROOT_TIMEOUT_SECONDS, IM_ALIVE_TIME_SECONDS
 from client.networking.NetworkHandler import NetworkHandler
@@ -24,6 +25,7 @@ class Host(Thread):
         self.mac = uuid.getnode()
         self.root_mac: int = self.mac
         self.im_alive_update_time = None
+        self.ip_address = ni.ifaddresses('eth0')[ni.AF_INET][0]['addr']
         info("MAC:" + str(self.mac))
 
     def run(self):
@@ -40,15 +42,17 @@ class Host(Thread):
     def interpret_message(self) -> None:
         while True:
             message = self.network_handler.receive_multicast_message()
-            message.accept(self)
+            # print("Sender:", message.sender[0])
+            # print("My address:", self.ip_address)
+            if message.sender[0] != self.ip_address:
+                message.accept(self)
 
     def handle_im_alive(self, message: ImAliveMessage) -> None:
-        if message.mac != self.mac:
-            debug(f"Handling message {message}")
-            self.im_alive_update_time = datetime.now()
-            if message.mac < self.root_mac:
-                self.root_mac = message.mac
-                self.root_address = message.sender
+        debug(f"Handling message {message}")
+        self.im_alive_update_time = datetime.now()
+        if message.mac < self.root_mac:
+            self.root_mac = message.mac
+            self.root_address = message.sender
 
     def handle_db_snapshot_request(self, message: DbSnapshotRequest) -> None:
         debug("Handling db snapshot message")
