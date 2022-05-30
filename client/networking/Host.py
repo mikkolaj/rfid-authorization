@@ -24,7 +24,7 @@ class Host(Thread):
         self.mac = randint(0, 100)
         self.root_mac: int = self.mac
         self.im_alive_update_time = None
-        info("MAC:", self.mac)
+        info("MAC:" + str(self.mac))
 
     def run(self):
         self.connect()
