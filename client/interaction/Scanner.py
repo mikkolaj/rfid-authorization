@@ -1,3 +1,4 @@
+from posixpath import isabs
 from threading import Thread
 from time import sleep
 from client.interaction.Door import Door
@@ -30,9 +31,9 @@ class Scanner(Thread):
         while True:
             tag_id = self.board.read()[0]
             info(tag_id)
+            user = self.database_manager.get_user(tag_id)
+            is_authorized = Authorization.UNAUTHORIZED if user is None else user.is_authorized
             if self.mode == InteractionMode.READ:
-                user = self.database_manager.get_user(tag_id)
-                is_authorized = Authorization.UNAUTHORIZED if user is None else user.is_authorized
                 if is_authorized == Authorization.UNAUTHORIZED:
                     self.handle_unauthorized_user(tag_id)
                 elif is_authorized == Authorization.AUTHORIZED:
@@ -41,7 +42,8 @@ class Scanner(Thread):
                     self.handle_admin_user()
 
             elif self.mode == InteractionMode.WRITE:
-                self.handle_modify_user(is_authorized, tag_id)
+                new_authorization = Authorization.AUTHORIZED if is_authorized == Authorization.UNAUTHORIZED else Authorization.UNAUTHORIZED
+                self.handle_modify_user(new_authorization, tag_id)
 
             sleep(2)
 
@@ -72,7 +74,7 @@ class Scanner(Thread):
 
     def handle_modify_user(self, is_authorized: Authorization, tag_id: int):
         info("Adding user!!" if is_authorized ==
-             Authorization.UNAUTHORIZED else "Removing user rights!!")
+             Authorization.AUTHORIZED else "Removing user rights!!")
 
         self.database_manager.create_or_update_user(
             tag_id, is_authorized)

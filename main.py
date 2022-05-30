@@ -26,7 +26,7 @@ def initialize_communication():
 
 
 if __name__ == '__main__':
-    dev = True
+    dev = False
     logging.basicConfig(level=logging.DEBUG)
     debug("Initializing...")
     host, database_manager = initialize_communication()
