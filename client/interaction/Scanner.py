@@ -1,17 +1,15 @@
-from posixpath import isabs
+from logging import info, debug
 from threading import Thread
 from time import sleep
-from client.interaction.Door import Door
 
+from client.interaction.Door import Door
 from client.interaction.InteractionMode import InteractionMode
 from client.interaction.Placement import Placement
 from client.networking.Host import Host
 from client.persistance.Authorization import Authorization
-from client.persistance.EventType import EventType
 from client.persistance.DatabaseManager import DatabaseManager
-from client.persistance.types.User import User
+from client.persistance.EventType import EventType
 from rfid_library import SimpleMFRC522
-from logging import info, debug
 
 
 class Scanner(Thread):
@@ -42,8 +40,10 @@ class Scanner(Thread):
                     self.handle_admin_user()
 
             elif self.mode == InteractionMode.WRITE:
-                new_authorization = Authorization.AUTHORIZED if is_authorized == Authorization.UNAUTHORIZED else Authorization.UNAUTHORIZED
-                self.handle_modify_user(new_authorization, tag_id)
+                if is_authorized == Authorization.ADMIN:
+                    self.set_interaction_mode(InteractionMode.READ)
+                else:
+                    self.handle_modify_user(Authorization.toggle_authorization(is_authorized), tag_id)
 
             sleep(2)
 
@@ -74,7 +74,7 @@ class Scanner(Thread):
 
     def handle_modify_user(self, is_authorized: Authorization, tag_id: int):
         info("Adding user!!" if is_authorized ==
-             Authorization.AUTHORIZED else "Removing user rights!!")
+                                Authorization.AUTHORIZED else "Removing user rights!!")
 
         self.database_manager.create_or_update_user(
             tag_id, is_authorized)

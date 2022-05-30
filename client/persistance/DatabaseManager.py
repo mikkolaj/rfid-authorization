@@ -68,7 +68,7 @@ class DatabaseManager:
         if result is None:
             return None
         else:
-            return User(result[0], Authorization.fromInt(int(result[1])), result[2])
+            return User(result[0], Authorization.from_int(int(result[1])), result[2])
 
     def is_tag_authorized(self, tag_id: int) -> bool:
         self.c.execute(

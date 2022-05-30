@@ -9,7 +9,11 @@ class Authorization(Enum):
     def __str__(self):
         return str(self.value)
 
-    def fromInt(number):
+    def from_int(number):
         for key in Authorization:
             if key.value == number:
                 return key
+
+    def toggle_authorization(authorization):
+        return Authorization.AUTHORIZED if authorization == Authorization.UNAUTHORIZED else Authorization.UNAUTHORIZED
+
