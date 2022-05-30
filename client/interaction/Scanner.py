@@ -78,7 +78,6 @@ class Scanner(Thread):
         info("Adding user!!" if is_authorized ==
              Authorization.AUTHORIZED else "Removing user rights!!")
 
-        print("dupsko:", time())
         self.database_manager.create_or_update_user(
             tag_id, is_authorized, time())
         self.host.send_one_user_update_to_root(tag_id)

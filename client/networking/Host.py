@@ -65,8 +65,6 @@ class Host(Thread):
         debug("Handling db update message")
         for user in message.db_records:
             current_user = self.database_manager.get_user(user.tag_id)
-            print("dupa User: ", user)
-            print("dupa Ten co mamy: ", current_user)
 
             if current_user is None or current_user.date < user.date:
                 self.database_manager.create_or_update_user(
