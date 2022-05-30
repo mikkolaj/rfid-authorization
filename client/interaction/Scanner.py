@@ -52,6 +52,7 @@ class Scanner(Thread):
 
     def handle_unauthorized_user(self, tag_id: int):
         info("Unauthorized!!")
+        self.door.indicate_unauthorized_access()
         event = EventType.DENIED_ENTRANCE if self.is_entrance() else EventType.DENIED_LEAVE
         self.database_manager.create_log(tag_id, event)
 
