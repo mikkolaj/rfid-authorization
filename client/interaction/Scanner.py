@@ -6,9 +6,9 @@ from client.interaction.Door import Door
 from client.interaction.InteractionMode import InteractionMode
 from client.interaction.Placement import Placement
 from client.networking.Host import Host
-from client.persistance.Authorization import Authorization
-from client.persistance.DatabaseManager import DatabaseManager
-from client.persistance.EventType import EventType
+from client.persistence.Authorization import Authorization
+from client.persistence.DatabaseManager import DatabaseManager
+from client.persistence.EventType import EventType
 from rfid_library import SimpleMFRC522
 
 

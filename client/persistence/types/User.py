@@ -1,4 +1,4 @@
-from client.persistance.Authorization import Authorization
+from client.persistence.Authorization import Authorization
 
 
 class User:

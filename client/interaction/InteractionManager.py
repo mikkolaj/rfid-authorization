@@ -6,7 +6,7 @@ from client.interaction.InteractionMode import InteractionMode
 from client.interaction.Placement import Placement
 from client.interaction.Scanner import Scanner
 from client.networking.Host import Host
-from client.persistance.DatabaseManager import DatabaseManager
+from client.persistence.DatabaseManager import DatabaseManager
 
 
 class InteractionManager(Thread):

@@ -1,4 +1,4 @@
-from client.persistance.EventType import EventType
+from client.persistence.EventType import EventType
 
 
 class Log:

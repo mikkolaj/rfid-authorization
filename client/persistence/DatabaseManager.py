@@ -5,9 +5,9 @@ from sqlite3 import Cursor
 from time import time
 from typing import Optional, List
 
-from client.persistance.Authorization import Authorization
-from client.persistance.EventType import EventType
-from client.persistance.types.User import User
+from client.persistence.Authorization import Authorization
+from client.persistence.EventType import EventType
+from client.persistence.types.User import User
 
 
 class TableName(Enum):

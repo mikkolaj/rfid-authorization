@@ -12,8 +12,8 @@ from client.networking.NetworkHandler import NetworkHandler
 from client.networking.messages.DbSnapshotRequest import DbSnapshotRequest
 from client.networking.messages.DbUpdateMessage import DbUpdateMessage
 from client.networking.messages.ImAliveMessage import ImAliveMessage
-from client.persistance.DatabaseManager import DatabaseManager
-from client.persistance.types.User import User
+from client.persistence.DatabaseManager import DatabaseManager
+from client.persistence.types.User import User
 
 
 class Host(Thread):

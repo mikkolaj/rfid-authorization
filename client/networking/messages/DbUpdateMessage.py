@@ -1,7 +1,7 @@
 from typing import List
 
 from client.networking.messages.Message import Message
-from client.persistance.types.User import User
+from client.persistence.types.User import User
 
 
 class DbUpdateMessage(Message):
