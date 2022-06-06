@@ -1,5 +1,6 @@
 from logging import debug
 import logging
+from time import time
 
 from client.networking.Host import Host
 from client.networking.NetworkHandler import NetworkHandler
@@ -14,7 +15,8 @@ def initialize_interaction(host: Host, database_manager: DatabaseManager):
 
 
 def set_admin(database_manager: DatabaseManager):
-    database_manager.create_or_update_user(770708610319, Authorization.ADMIN)
+    database_manager.create_or_update_user(
+        770708610319, Authorization.ADMIN, time())
 
 
 def initialize_communication():

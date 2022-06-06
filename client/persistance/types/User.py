@@ -6,3 +6,6 @@ class User:
         self.tag_id = tag_id
         self.is_authorized = is_authorized
         self.date = date
+
+    def __str__(self) -> str:
+        return f"""tag: {self.tag_id}, isAuth: {self.is_authorized}, date: {self.date}"""

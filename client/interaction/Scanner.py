@@ -1,6 +1,6 @@
 from logging import info, debug
 from threading import Thread
-from time import sleep
+from time import sleep, time
 
 from client.interaction.Door import Door
 from client.interaction.InteractionMode import InteractionMode
@@ -43,7 +43,8 @@ class Scanner(Thread):
                 if is_authorized == Authorization.ADMIN:
                     self.set_interaction_mode(InteractionMode.READ)
                 else:
-                    self.handle_modify_user(Authorization.toggle_authorization(is_authorized), tag_id)
+                    self.handle_modify_user(
+                        Authorization.toggle_authorization(is_authorized), tag_id)
 
             sleep(2)
 
@@ -75,10 +76,10 @@ class Scanner(Thread):
 
     def handle_modify_user(self, is_authorized: Authorization, tag_id: int):
         info("Adding user!!" if is_authorized ==
-                                Authorization.AUTHORIZED else "Removing user rights!!")
+             Authorization.AUTHORIZED else "Removing user rights!!")
 
         self.database_manager.create_or_update_user(
-            tag_id, is_authorized)
+            tag_id, is_authorized, time())
         self.host.send_one_user_update_to_root(tag_id)
         self.set_interaction_mode(InteractionMode.READ)
 

@@ -54,7 +54,7 @@ class DatabaseManager:
             f"""INSERT INTO logs(created_at, event_type, tag_id) VALUES ({time()}, {event_type}, {tag_id})""")
 
     def create_or_update_user(self, tag_id: int, is_authorized: Authorization = Authorization.AUTHORIZED,
-                              update_time: float = time()) -> None:
+                              update_time: float = None) -> None:
         self.c.execute(
             f'INSERT OR REPLACE INTO users(tag_id, is_authorized, created_at) '
             f'VALUES ({tag_id}, {is_authorized}, {update_time})'
